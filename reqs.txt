@@ -12,3 +12,10 @@ psycopg2-binary==2.9.11
 PyJWT==2.10.1
 sqlparse==0.5.4
 tzdata==2025.2
+django-cors-headers>=4.9.0
+channels==4.1.0
+uvicorn[standard]==0.24.0
+daphne==4.2.1
+channels-redis==4.2.1
+redis==5.0.8
+whitenoise==6.9.0

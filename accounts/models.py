@@ -5,12 +5,13 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager,Permissi
 
 class AccountBaseUserManager(BaseUserManager):
     use_in_migrations = True
-    def _create_user(self,email,phone,name,password,**extra_fields):
-        values = [email,phone,name]
-        field_value_map = dict(zip(self.model.REQUIRED_FIELDS,values))
-        for field_name ,value in field_value_map.items():
-            if not value:
-                raise ValueError(f'The {field_name} value must be set')
+    def _create_user(self,email,name,phone,password,**extra_fields):
+        if not email:
+            raise ValueError("Email must be set")
+        if not name:
+            raise ValueError("Name must be set")
+        if not phone:
+            raise ValueError("Phone must be set")
 
         email = self.normalize_email(email)
         user  = self.model(
@@ -49,10 +50,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(max_length=150)
     phone = models.CharField(max_length=50)
     date_of_birth = models.DateField(blank=True, null=True)
-    picture = models.ImageField(blank=True, null=True)
+    picture = models.ImageField(upload_to='users/', blank=True, null=True)
+
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(auto_now=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(null=True)
 
     objects = AccountBaseUserManager()

@@ -12,6 +12,11 @@
 
       volumes:
         - postgres_data:/var/lib/postgresql/data
+    redis:
+      image: redis:7
+      ports:
+        - "6379:6379"
+
 
     crm:
       build: .
@@ -20,17 +25,21 @@
         sh -c "python manage.py makemigrations &&
               python manage.py migrate &&
               python manage.py collectstatic --noinput &&
-              python manage.py runserver 0.0.0.0:8000"
+              uvicorn core.asgi:application --host 0.0.0.0 --port 8000 --workers 1 --reload"
       ports: 
-        - "8000:8000"
+        - "80:8000"
       environment:
         SECRET_KEY: ${SECRET_KEY}
         DEBUG: ${DEBUG}
         DATABASE_URL: ${DATABASE_URL}
       depends_on: 
         - db 
+        - redis
       env_file:
         - .env
+
+      volumes:
+        - .:/app   
 
 
 

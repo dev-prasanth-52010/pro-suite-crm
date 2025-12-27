@@ -15,6 +15,8 @@ from pathlib import Path
 import environ
 import os
 
+from datetime import timedelta 
+
 env = environ.Env(
     DEBUG=(bool, False)
 )
@@ -23,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+DEBUG = True
 
 
-ALLOWED_HOSTS =["127.0.0.1","localhost"]
+ALLOWED_HOSTS =["127.0.0.1","localhost","0.0.0.0"]
 
 
 
@@ -39,13 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     #thirdparty-api
     "rest_framework",
+    "corsheaders",
+    "channels",
     #apps
     'accounts',
+    'sales',
+    'chat',
+    "leads"
     
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware', 
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,6 +81,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
+ASGI_APPLICATION = "core.asgi.application"
+
 
 
 import dj_database_url
@@ -105,8 +116,12 @@ USE_TZ = True
 
 
 
+
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [] 
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -114,5 +129,47 @@ AUTH_USER_MODEL = 'accounts.User'
 
 REST_FRAMEWORK = {
 
-    'EXCEPTION_HANDLER':'core.custom_exceptions.custom_exception_handler'
+    # 'EXCEPTION_HANDLER':'core.custom_exceptions.custom_exception_handler',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'core.auth.CookieJWTAuthentication',
+        
+    ),
 }
+
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME_LATE_USER': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME_LATE_USER': timedelta(days=30),
+}
+
+# Only allow your frontend origin
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Vite React frontend
+    "http://localhost:3000",  # Vite React frontend
+]
+
+
+CORS_ALLOW_CREDENTIALS = True
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [("redis", 6379)]}, 
+    }
+}
+
+
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.ScryptPasswordHasher",
+]

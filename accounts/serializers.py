@@ -11,3 +11,9 @@ class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ["email","password"]
         model = User
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["name","email","is_active","last_login","phone","date_of_birth"]
