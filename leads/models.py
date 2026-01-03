@@ -46,9 +46,9 @@ class Contacts(Auditlog):
     
 
     def __str__(self):
-        return self.id
+        return str(self.id)
     
     def save(self,*args,**kwarg):
         if self.slug:
-            self.slug = f"CNT-{slugify(uuid.uuid4)}"
+            self.slug = f"CNT-{slugify(uuid.uuid4())}"
         return super().save(*args,**kwarg)

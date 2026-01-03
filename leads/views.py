@@ -12,8 +12,16 @@ class ContactAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "results":{},
+                "message":"contact saved.",
+                "sucess":"true",
+            },status=status.HTTP_201_CREATED)
         return Response({
             "results":{},
-            "message":"contact saved.",
-            "sucess":"true",
-        })
+            "message":serializer.errors,
+            "code":400
+        },status=status.HTTP_400_BAD_REQUEST)

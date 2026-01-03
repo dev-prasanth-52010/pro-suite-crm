@@ -13,16 +13,13 @@ class ContactSerializer(serializers.ModelSerializer):
                   "history","course","elective","program"]  
         
 
-    def validate(self,attrs):
-        first_name = attrs.get("first_name")
-        last_name = attrs.get("last_name")  
+   
+    def validate_first_name(self, value):
+        if not value.isalpha():
+            raise ValidationError("First name cannot contain numbers or special characters.")
+        return value
 
-        if not str(first_name).isalpha() and str(last_name).isalpha() :
-            raise ValidationError("first , last name contains numeric")
-        
-
-        return attrs
-    
-
-    def create(self, validated_data):
-        return Contacts.objects.create(**validated_data)
+    def validate_last_name(self,value):
+        if not value.isalpha():
+            raise ValidationError("name can't contains numeric")
+        return value
